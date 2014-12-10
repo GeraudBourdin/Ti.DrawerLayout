@@ -58,6 +58,18 @@ public class Drawer extends TiUIView {
 	int drawable_ic_drawer = 0;
 	int string_drawer_open = 0;
 	int string_drawer_close = 0;
+	
+	public class ContentView extends TiUIView {
+
+		public ContentView(TiViewProxy proxy) {
+			super(proxy);
+			
+			TiCompositeLayout view = new TiCompositeLayout(proxy.getActivity());
+			
+			setNativeView(view);
+		}
+		
+	}
 
 	public Drawer(final DrawerProxy proxy, Activity activity) {
 		super(proxy);
@@ -72,9 +84,9 @@ public class Drawer extends TiUIView {
 			Log.e(TAG, "XML resources could not be found!!!");
 		}
 
-		contentView = new ContentView(this.activity);
+		contentView = new ContentView(this.proxy);
 		layout = new DrawerLayout(this.activity);
-		layout.addView(contentView);
+		layout.addView(contentView.getOuterView());
 		
 		setNativeView(layout);
 
@@ -274,14 +286,11 @@ public class Drawer extends TiUIView {
 		}
 		
 		if (this.centerView != null){
-			this.contentView.removeView(this.centerView.getOrCreateView().getOuterView());
+			this.contentView.remove(this.centerView.getOrCreateView());
 		}
 		
-		View view = viewProxy.getOrCreateView().getOuterView();
-		TiCompositeLayout.LayoutParams params = new TiCompositeLayout.LayoutParams();
-		params.autoFillsHeight = true;
-		params.autoFillsWidth = true;
-		this.contentView.addView(view, params);
+		TiUIView view = viewProxy.getOrCreateView();
+		this.contentView.add(view);
 		
 		this.centerView = viewProxy;
 	}
