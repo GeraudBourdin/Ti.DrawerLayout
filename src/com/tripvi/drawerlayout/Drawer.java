@@ -11,7 +11,9 @@ import org.appcelerator.titanium.util.TiUIHelper;
 import org.appcelerator.titanium.view.TiUIView;
 
 import ti.modules.titanium.ui.WindowProxy;
+import android.os.Bundle;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.LayoutParams;
@@ -460,6 +462,33 @@ public class Drawer extends TiUIView {
 			mDrawerToggle.setDrawerIndicatorEnabled(b);
 		} else {
 			super.propertyChanged(key, oldValue, newValue, proxy);
+		}
+	}
+	
+	public class ContentWrapperFragment extends Fragment {
+
+		View mContentView;
+
+		public ContentWrapperFragment() {
+		}
+
+		@Override
+		public View onCreateView(LayoutInflater inflater, ViewGroup container,
+				Bundle savedInstanceState) {
+			return mContentView;
+		}
+
+		@Override
+		public void onDestroyView() {
+			super.onDestroy();
+
+			if (mContentView != null) {
+				((ViewGroup) mContentView.getParent()).removeView(mContentView);
+			}
+		}
+
+		public void setContentView(View cv) {
+			mContentView = cv;
 		}
 	}
 
