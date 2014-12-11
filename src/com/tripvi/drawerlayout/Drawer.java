@@ -8,6 +8,7 @@ import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.util.TiRHelper;
 import org.appcelerator.titanium.util.TiRHelper.ResourceNotFoundException;
 import org.appcelerator.titanium.util.TiUIHelper;
+import org.appcelerator.titanium.view.TiCompositeLayout;
 import org.appcelerator.titanium.view.TiUIView;
 
 import ti.modules.titanium.ui.WindowProxy;
@@ -278,9 +279,8 @@ public class Drawer extends TiUIView {
 		}
 
 		// update the main content by replacing fragments
-		View contentView = viewProxy.getOrCreateView().getOuterView();
-		ContentWrapperFragment fragment = new ContentWrapperFragment();
-		fragment.setContentView(contentView);
+		ContentView fragment = (ContentView) ContentView.newInstance();
+		fragment.setContentView(viewProxy);
 
 		FragmentManager fragmentManager = ((ActionBarActivity) proxy
 				.getActivity()).getSupportFragmentManager();
@@ -465,31 +465,34 @@ public class Drawer extends TiUIView {
 		}
 	}
 	
-	public class ContentWrapperFragment extends Fragment {
-
-		View mContentView;
-
-		public ContentWrapperFragment() {
+	public static class ContentView extends Fragment {
+		
+		private TiViewProxy view;
+		
+		public ContentView() {
 		}
 
-		@Override
-		public View onCreateView(LayoutInflater inflater, ViewGroup container,
-				Bundle savedInstanceState) {
-			return mContentView;
+		public static Fragment newInstance() {
+            return new ContentView();
+        }
+		
+		public void setContentView(TiViewProxy view) {
+			this.view = view;
 		}
 
+		public TiViewProxy getContentView() {
+			return this.view;
+		}
+		
 		@Override
-		public void onDestroyView() {
-			super.onDestroy();
-
-			if (mContentView != null) {
-				((ViewGroup) mContentView.getParent()).removeView(mContentView);
+        public View onCreateView(LayoutInflater inflater, ViewGroup container,
+                                 Bundle savedInstanceState) {
+            
+			if (view == null) {
+				return null;
 			}
-		}
-
-		public void setContentView(View cv) {
-			mContentView = cv;
-		}
+			return view.getOrCreateView().getOuterView();
+        }
 	}
 
 	/**
