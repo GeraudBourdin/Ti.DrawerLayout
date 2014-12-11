@@ -30,7 +30,7 @@ public class DrawerProxy extends TiViewProxy {
 
 	@Override
 	public TiUIView createView(Activity activity) {
-		drawer = new Drawer(this, activity);
+		drawer = new Drawer(this);
 		drawer.getLayoutParams().autoFillsHeight = true;
 		drawer.getLayoutParams().autoFillsWidth = true;
 		return drawer;

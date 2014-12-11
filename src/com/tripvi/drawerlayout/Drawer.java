@@ -8,17 +8,17 @@ import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.util.TiRHelper;
 import org.appcelerator.titanium.util.TiRHelper.ResourceNotFoundException;
 import org.appcelerator.titanium.util.TiUIHelper;
-import org.appcelerator.titanium.view.TiCompositeLayout;
 import org.appcelerator.titanium.view.TiUIView;
 
 import ti.modules.titanium.ui.WindowProxy;
-import android.app.Activity;
 import android.support.v4.app.ActionBarDrawerToggle;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.LayoutParams;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
@@ -28,7 +28,6 @@ public class Drawer extends TiUIView {
 	private DrawerLayout layout;
 	private ActionBarDrawerToggle mDrawerToggle;
 
-	private ActionBarActivity activity;
 	private FrameLayout menu; /* left drawer */
 	private FrameLayout filter; /* right drawer */
 	private int menuWidth;
@@ -41,7 +40,6 @@ public class Drawer extends TiUIView {
 	private TiViewProxy leftView;
 	private TiViewProxy rightView;
 	private TiViewProxy centerView;
-	private ContentView contentView;
 
 	// Static Properties
 	public static final String PROPERTY_LEFT_VIEW = "leftView";
@@ -50,32 +48,38 @@ public class Drawer extends TiUIView {
 	public static final String PROPERTY_LEFT_VIEW_WIDTH = "leftDrawerWidth";
 	public static final String PROPERTY_RIGHT_VIEW_WIDTH = "rightDrawerWidth";
 	public static final String PROPERTY_DRAWER_INDICATOR_ENABLED = "drawerIndicatorEnabled";
-	public static final String PROPERTY_DRAWER_INDICATOR_IMAGE = "drawerIndicatorImage";
-	public static final String PROPERTY_DRAWER_LOCK_MODE = "drawerLockMode";
+    public static final String PROPERTY_DRAWER_INDICATOR_IMAGE = "drawerIndicatorImage";
+    public static final String PROPERTY_DRAWER_LOCK_MODE = "drawerLockMode";
 
 	private static final String TAG = "TripviDrawer";
 
 	int drawable_ic_drawer = 0;
 	int string_drawer_open = 0;
 	int string_drawer_close = 0;
+	int layout_drawer_main = 0;
+	int id_content_frame = 0;
 
-	public Drawer(final DrawerProxy proxy, Activity activity) {
+	public Drawer(final DrawerProxy proxy) {
 		super(proxy);
-		
-		this.activity = (ActionBarActivity) activity;
 
 		try {
 			drawable_ic_drawer = TiRHelper.getResource("drawable.ic_drawer");
 			string_drawer_open = TiRHelper.getResource("string.drawer_open");
 			string_drawer_close = TiRHelper.getResource("string.drawer_close");
+			layout_drawer_main = TiRHelper.getResource("layout.drawer_main");
+			id_content_frame = TiRHelper.getResource("id.content_frame");
 		} catch (ResourceNotFoundException e) {
 			Log.e(TAG, "XML resources could not be found!!!");
 		}
 
-		contentView = new ContentView(this.activity);
-		layout = new DrawerLayout(this.activity);
-		layout.addView(contentView);
-		
+		ActionBarActivity activity = (ActionBarActivity) proxy.getActivity();
+
+		// DrawerLayout을 생성한다.
+		LayoutInflater inflater = LayoutInflater.from(activity);
+		layout = (DrawerLayout) inflater.inflate(layout_drawer_main, null,
+				false);
+
+		// TiUIView
 		setNativeView(layout);
 
 	}
@@ -263,8 +267,6 @@ public class Drawer extends TiUIView {
 	 * centerView 변경
 	 */
 	private void replaceCenterView(TiViewProxy viewProxy) {
-		
-		
 		if (viewProxy == this.centerView) {
 			Log.d(TAG, "centerView was not changed");
 			return;
@@ -272,17 +274,17 @@ public class Drawer extends TiUIView {
 		if (viewProxy == null) {
 			return;
 		}
-		
-		if (this.centerView != null){
-			this.contentView.removeView(this.centerView.getOrCreateView().getOuterView());
-		}
-		
-		View view = viewProxy.getOrCreateView().getOuterView();
-		TiCompositeLayout.LayoutParams params = new TiCompositeLayout.LayoutParams();
-		params.autoFillsHeight = true;
-		params.autoFillsWidth = true;
-		this.contentView.addView(view, params);
-		
+
+		// update the main content by replacing fragments
+		View contentView = viewProxy.getOrCreateView().getOuterView();
+		ContentWrapperFragment fragment = new ContentWrapperFragment();
+		fragment.setContentView(contentView);
+
+		FragmentManager fragmentManager = ((ActionBarActivity) proxy
+				.getActivity()).getSupportFragmentManager();
+		fragmentManager.beginTransaction().replace(id_content_frame, fragment)
+				.commit();
+
 		this.centerView = viewProxy;
 	}
 
@@ -290,7 +292,8 @@ public class Drawer extends TiUIView {
 	public void processProperties(KrollDict d) {
         if (d.containsKey(PROPERTY_DRAWER_INDICATOR_IMAGE)) {
             String imageUrl = d.getString(PROPERTY_DRAWER_INDICATOR_IMAGE);
-            drawable_custom_drawer = TiUIHelper.getResourceId(proxy.resolveUrl(null, imageUrl));
+            drawable_custom_drawer = TiUIHelper.getResourceId(proxy.resolveUrl(
+                                                                               null, imageUrl));
             if (drawable_custom_drawer != 0) {
                 useCustomDrawer = true;
             }
