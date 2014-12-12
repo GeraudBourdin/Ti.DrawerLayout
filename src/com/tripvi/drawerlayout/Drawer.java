@@ -60,7 +60,7 @@ public class Drawer extends TiUIView {
 	int string_drawer_open = 0;
 	int string_drawer_close = 0;
 	int layout_drawer_main = 0;
-	int id_content_frame = android.R.id.tabcontent;
+	int id_content_frame = 0;
 
 	public Drawer(final DrawerProxy proxy) {
 		super(proxy);
@@ -70,6 +70,7 @@ public class Drawer extends TiUIView {
 			string_drawer_open = TiRHelper.getResource("string.drawer_open");
 			string_drawer_close = TiRHelper.getResource("string.drawer_close");
 			layout_drawer_main = TiRHelper.getResource("layout.drawer_main");
+			id_content_frame = TiRHelper.getResource("layout.content_frame");
 		} catch (ResourceNotFoundException e) {
 			Log.e(TAG, "XML resources could not be found!!!");
 		}
@@ -275,7 +276,7 @@ public class Drawer extends TiUIView {
 		
 		if (contentFragment == null){
 			// update the main content by replacing fragments
-			contentFragment = new ContentView();
+			contentFragment = (ContentView) ContentView.newInstance();
 
 			FragmentManager fragmentManager = ((ActionBarActivity) proxy
 					.getActivity()).getSupportFragmentManager();
