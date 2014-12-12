@@ -232,8 +232,6 @@ public class Drawer extends TiUIView {
 		if (hasMenu)
 			return;
 
-		Log.d(TAG, "initializing left drawer");
-
 		// menu: left drawer
 		menu = new FrameLayout(proxy.getActivity());
 		LayoutParams menuLayout = new LayoutParams(LayoutParams.WRAP_CONTENT,
@@ -251,8 +249,6 @@ public class Drawer extends TiUIView {
 	private void initRightDrawer() {
 		if (hasFilter)
 			return;
-
-		Log.d(TAG, "initializing right drawer");
 
 		// filter: right drawer
 		filter = new FrameLayout(proxy.getActivity());
@@ -294,8 +290,7 @@ public class Drawer extends TiUIView {
 	public void processProperties(KrollDict d) {
         if (d.containsKey(PROPERTY_DRAWER_INDICATOR_IMAGE)) {
             String imageUrl = d.getString(PROPERTY_DRAWER_INDICATOR_IMAGE);
-            drawable_custom_drawer = TiUIHelper.getResourceId(proxy.resolveUrl(
-                                                                               null, imageUrl));
+            drawable_custom_drawer = TiUIHelper.getResourceId(proxy.resolveUrl(null, imageUrl));
             if (drawable_custom_drawer != 0) {
                 useCustomDrawer = true;
             }
@@ -343,16 +338,10 @@ public class Drawer extends TiUIView {
 		if (d.containsKey(PROPERTY_LEFT_VIEW_WIDTH)) {
 			menuWidth = getDevicePixels(d.get(PROPERTY_LEFT_VIEW_WIDTH));
 
-			Log.d(TAG, "set menuWidth = " + d.get(PROPERTY_LEFT_VIEW_WIDTH)
-					+ " in pixel: " + menuWidth);
-
 			menu.getLayoutParams().width = menuWidth;
 		}
 		if (d.containsKey(PROPERTY_RIGHT_VIEW_WIDTH)) {
 			filterWidth = getDevicePixels(d.get(PROPERTY_RIGHT_VIEW_WIDTH));
-
-			Log.d(TAG, "set filterWidth = " + d.get(PROPERTY_RIGHT_VIEW_WIDTH)
-					+ " in pixel: " + filterWidth);
 
 			filter.getLayoutParams().width = filterWidth;
 		}
@@ -374,9 +363,6 @@ public class Drawer extends TiUIView {
 	@Override
 	public void propertyChanged(String key, Object oldValue, Object newValue,
 			KrollProxy proxy) {
-
-		Log.d(TAG, "propertyChanged  Property: " + key + " old: " + oldValue
-				+ " new: " + newValue);
 
 		if (key.equals(PROPERTY_LEFT_VIEW)) {
 			if (newValue == this.leftView)
@@ -434,9 +420,6 @@ public class Drawer extends TiUIView {
 		} else if (key.equals(PROPERTY_LEFT_VIEW_WIDTH)) {
 			menuWidth = getDevicePixels(newValue);
 
-			Log.d(TAG, "change menuWidth = " + newValue + " in pixel: "
-					+ menuWidth);
-
 			initLeftDrawer();
 
 			LayoutParams menuLayout = new LayoutParams(menuWidth,
@@ -445,9 +428,6 @@ public class Drawer extends TiUIView {
 			this.menu.setLayoutParams(menuLayout);
 		} else if (key.equals(PROPERTY_RIGHT_VIEW_WIDTH)) {
 			filterWidth = getDevicePixels(newValue);
-
-			Log.d(TAG, "change filterWidth = " + newValue + " in pixel: "
-					+ filterWidth);
 
 			initRightDrawer();
 
