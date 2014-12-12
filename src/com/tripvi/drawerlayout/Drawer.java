@@ -8,7 +8,6 @@ import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.util.TiRHelper;
 import org.appcelerator.titanium.util.TiRHelper.ResourceNotFoundException;
 import org.appcelerator.titanium.util.TiUIHelper;
-import org.appcelerator.titanium.view.TiCompositeLayout;
 import org.appcelerator.titanium.view.TiUIView;
 
 import ti.modules.titanium.ui.WindowProxy;
@@ -43,6 +42,7 @@ public class Drawer extends TiUIView {
 	private TiViewProxy leftView;
 	private TiViewProxy rightView;
 	private TiViewProxy centerView;
+	private ContentView contentFragment;
 
 	// Static Properties
 	public static final String PROPERTY_LEFT_VIEW = "leftView";
@@ -60,7 +60,7 @@ public class Drawer extends TiUIView {
 	int string_drawer_open = 0;
 	int string_drawer_close = 0;
 	int layout_drawer_main = 0;
-	int id_content_frame = 0;
+	int id_content_frame = android.R.id.tabcontent;
 
 	public Drawer(final DrawerProxy proxy) {
 		super(proxy);
@@ -70,7 +70,6 @@ public class Drawer extends TiUIView {
 			string_drawer_open = TiRHelper.getResource("string.drawer_open");
 			string_drawer_close = TiRHelper.getResource("string.drawer_close");
 			layout_drawer_main = TiRHelper.getResource("layout.drawer_main");
-			id_content_frame = TiRHelper.getResource("id.content_frame");
 		} catch (ResourceNotFoundException e) {
 			Log.e(TAG, "XML resources could not be found!!!");
 		}
@@ -273,15 +272,18 @@ public class Drawer extends TiUIView {
 		if (viewProxy == null) {
 			return;
 		}
+		
+		if (contentFragment == null){
+			// update the main content by replacing fragments
+			contentFragment = new ContentView();
 
-		// update the main content by replacing fragments
-		ContentView fragment = (ContentView) ContentView.newInstance();
-		fragment.setContentView(viewProxy);
-
-		FragmentManager fragmentManager = ((ActionBarActivity) proxy
-				.getActivity()).getSupportFragmentManager();
-		fragmentManager.beginTransaction().replace(id_content_frame, fragment)
-				.commit();
+			FragmentManager fragmentManager = ((ActionBarActivity) proxy
+					.getActivity()).getSupportFragmentManager();
+			fragmentManager.beginTransaction().add(id_content_frame, contentFragment)
+					.commit();
+		}
+		
+		contentFragment.setContentView(viewProxy);
 
 		this.centerView = viewProxy;
 	}
