@@ -40,8 +40,7 @@ import static java.lang.Math.sqrt;
 /** A drawable that rotates between a drawer icon and a back arrow based on parameter. */
 public class DrawerArrowDrawable extends Drawable {
 
-	
-	/**
+  /**
    * Joins two {@link Path}s as if they were one where the first 50% of the path is {@code
    * PathFirst} and the second 50% of the path is {@code pathSecond}.
    */
@@ -142,6 +141,7 @@ public class DrawerArrowDrawable extends Drawable {
 
   private boolean flip;
   private float parameter;
+
   // Helper fields during drawing calculations.
   private float vX, vY, magnitude, paramA, paramB;
   private final float coordsA[] = { 0f, 0f };
