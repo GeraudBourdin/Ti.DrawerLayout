@@ -9,25 +9,25 @@ import org.appcelerator.titanium.util.TiConvert;
 import org.appcelerator.titanium.util.TiRHelper;
 import org.appcelerator.titanium.util.TiRHelper.ResourceNotFoundException;
 import org.appcelerator.titanium.util.TiUIHelper;
-import org.appcelerator.titanium.view.TiUIView;
 import org.appcelerator.titanium.view.TiUIFragment;
+import org.appcelerator.titanium.view.TiUIView;
 
 import ti.modules.titanium.ui.WindowProxy;
+import android.content.res.Resources;
 import android.support.v4.app.ActionBarDrawerToggle;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v4.widget.DrawerLayout.LayoutParams;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
-import android.graphics.Color;
-import android.content.res.Resources;
 
 public class Drawer extends TiUIView {
 
@@ -35,7 +35,7 @@ public class Drawer extends TiUIView {
 	private ActionBarDrawerToggle mDrawerToggle;
 	private DrawerArrowDrawable drawerArrowDrawable;
 
-	private FrameLayout menu; /* left drawer */
+	private RecyclerView menu; /* left drawer */
 	private FrameLayout filter; /* right drawer */
 	private int menuWidth;
 	private int filterWidth;
@@ -223,6 +223,11 @@ public class Drawer extends TiUIView {
 		if (activity.getSupportActionBar() == null) {
 			return;
 		}
+		
+		// enable ActionBar app icon to behave as action to toggle nav
+		// drawer
+		activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+		activity.getSupportActionBar().setHomeButtonEnabled(true);
 
 		int drawer_drawable;
 
@@ -242,11 +247,6 @@ public class Drawer extends TiUIView {
 			activity.getSupportActionBar().setHomeAsUpIndicator(
 					drawerArrowDrawable);
 		} else {
-
-			// enable ActionBar app icon to behave as action to toggle nav
-			// drawer
-			activity.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-			activity.getSupportActionBar().setHomeButtonEnabled(true);
 
 			// ActionBarDrawerToggle ties together the the proper interactions
 			// between the sliding drawer and the action bar app icon
@@ -325,21 +325,31 @@ public class Drawer extends TiUIView {
 	/**
 	 * drawer가 필요할때 그때그때 추가
 	 */
-	private void initLeftDrawer() {
+	private void initLeftDrawer(View leftView) {
 		if (hasMenu) {
 			return;
 		}
 
 		Log.d(TAG, "initializing left drawer");
-
+		
+		menu.setHasFixedSize(true);
+		
 		// menu: left drawer
-		menu = new FrameLayout(proxy.getActivity());
+		//menu = new FrameLayout(proxy.getActivity());
 		LayoutParams menuLayout = new LayoutParams(LayoutParams.WRAP_CONTENT,
-				LayoutParams.MATCH_PARENT);
-		menuLayout.gravity = Gravity.START;
+				LayoutParams.MATCH_PARENT, Gravity.START);
 		menu.setLayoutParams(menuLayout);
-
-		layout.addView(menu);
+		
+		LinearLayoutManager menuLayoutManager = new LinearLayoutManager(proxy.getActivity());
+		menu.setLayoutManager(menuLayoutManager);
+		
+		if (leftView != null){
+			leftView.setLayoutParams(menuLayout);
+			layout.addView(leftView);
+		}
+		
+		//this.menu.addView(leftView);
+		//layout.addView(menu);
 
 		hasMenu = true;
 
@@ -447,10 +457,11 @@ public class Drawer extends TiUIView {
 				if (leftView instanceof WindowProxy)
 					throw new IllegalStateException(
 							"[ERROR] Cannot add window as a child view of other window");
-				//
 				this.leftView = (TiViewProxy) leftView;
-				this.initLeftDrawer();
-				this.menu.addView(getNativeView(this.leftView));
+				View nativeLeftView = getNativeView(this.leftView);
+				if (nativeLeftView != null){
+					this.initLeftDrawer(nativeLeftView);
+				}
 			} else {
 				Log.e(TAG, "[ERROR] Invalid type for leftView");
 			}
@@ -480,6 +491,7 @@ public class Drawer extends TiUIView {
 			}
 		}
 		if (d.containsKey(PROPERTY_LEFT_VIEW_WIDTH)) {
+			
 			menuWidth = getDevicePixels(d.get(PROPERTY_LEFT_VIEW_WIDTH));
 
 			Log.d(TAG, "set menuWidth = " + d.get(PROPERTY_LEFT_VIEW_WIDTH)
@@ -523,10 +535,9 @@ public class Drawer extends TiUIView {
 				if (newValue instanceof WindowProxy)
 					throw new IllegalStateException(
 							"[ERROR] Cannot add window as a child view of other window");
-				newProxy = (TiViewProxy) newValue;
-				initLeftDrawer();
-				this.menu.addView(newProxy.getOrCreateView().getOuterView(),
-						index);
+				this.leftView = (TiViewProxy) newValue;
+				View nativeLeftView = getNativeView(this.leftView);
+				this.initLeftDrawer(nativeLeftView);
 			} else {
 				Log.e(TAG, "[ERROR] Invalid type for leftView");
 			}
@@ -569,12 +580,7 @@ public class Drawer extends TiUIView {
 			Log.d(TAG, "change menuWidth = " + newValue + " in pixel: "
 					+ menuWidth);
 
-			initLeftDrawer();
-
-			LayoutParams menuLayout = new LayoutParams(menuWidth,
-					LayoutParams.MATCH_PARENT);
-			menuLayout.gravity = Gravity.START;
-			this.menu.setLayoutParams(menuLayout);
+			menu.getLayoutParams().width = menuWidth;
 		} else if (key.equals(PROPERTY_RIGHT_VIEW_WIDTH)) {
 			filterWidth = getDevicePixels(newValue);
 
