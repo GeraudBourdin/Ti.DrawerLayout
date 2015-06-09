@@ -1,5 +1,7 @@
 # Ti.DrawerLayout [![Titanium](http://www-static.appcelerator.com/badges/titanium-git-badge-sq.png)](http://www.appcelerator.com/titanium/)
 
+[![Join the chat at https://gitter.im/manumaticx/Ti.DrawerLayout](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/manumaticx/Ti.DrawerLayout?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 > Native Android [Navigation Drawer](http://developer.android.com/design/patterns/navigation-drawer.html) for [Titanium](http://www.appcelerator.com/titanium/)
 
 _This is a fork of [Tripvi/Ti.DrawerLayout](https://github.com/Tripvi/Ti.DrawerLayout). I temporarily picked it up since the author is busy these days. I've activated issues and pull requests here, so feel free to contribute._
@@ -25,44 +27,49 @@ To expand the drawer the user can either touch the app icon or swipe from the le
 Here's an example of how to use the module. Please note the links for Demo App and API Docs below.
 
 ```javascript
-if (OS_ANDROID) {
+// Load module
+var TiDrawerLayout = require('com.tripvi.drawerlayout');
 
-    // Load module
-    var TiDrawerLayout = require('com.tripvi.drawerlayout');
+// define menu and main content view
+var menuTable = Ti.UI.createTableView();
+var contentView = Ti.UI.createView();
 
-    // define menu and main content view
-    var menuTable = Alloy.createController('menu').getView();
-    var contentView = Alloy.createController('main').getView();
+// create the Drawer
+var drawer = TiDrawerLayout.createDrawer({
+    leftView: menuTable,
+    centerView: contentView,
+    leftDrawerWidth: "240dp",
+    width: Ti.UI.FILL,
+    height: Ti.UI.FILL
+});
 
-    // create the Drawer
-    var drawer = TiDrawerLayout.createDrawer({
-            leftView: menuTable,
-            centerView: contentView,
-            leftDrawerWidth: "240dp",
-            width: Ti.UI.FILL,
-            height: Ti.UI.FILL
-    });
+// create a window
+var win = Ti.UI.createWindow();
 
-    // add some listeners
-    drawer.addEventListener('draweropen', function(e) {
-            // drawer is open
-    });
+// add the drawer to the window
+win.add(drawer);
 
-    drawer.addEventListener('drawerclose', function(e) {
-            // drawer is closed
-    });
+// listen for the open event...
+win.addEventListener('open', function(){
+    
+    // ...to access activity and action bar
+    var activity = win.getActivity();
+    var actionbar = activity.getActionBar();
+    
+    if (actionbar){
+    
+        // this makes the drawer indicator visible in the action bar
+        actionBar.displayHomeAsUp = true;
+        
+        // open and close with the app icon
+        actionBar.onHomeIconItemSelected = function() {
+            drawer.toggleLeftWindow();
+        };
+    }
+});
 
-    drawer.addEventListener('drawerslide', function(e) {
-            // drawer is sliding
-            // slide offset: e.offset
-    });
-
-    // add the drawer to your root window
-    $.index.add(drawer);
-
-    // open the window
-    $.index.open();
-}
+// open the window
+win.open();
 ```
 
 #### [API Documentation](documentation/index.md)
@@ -70,7 +77,7 @@ if (OS_ANDROID) {
 
 ## Known Issues
 
-* MapView is not working with centerView
+* ~~MapView is not working with centerView~~
 * TabGroup is not working with Drawer
 * ActionBar SearchView seems to make problems too
 
